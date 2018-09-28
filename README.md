@@ -96,6 +96,7 @@ const GooglePlacesInput = () => {
 | poweredContainer | object (View style) |
 | powered | object (Image style) |
 | separator | object (View style) |
+| row | object (View style) |
 
 
 #### Example
@@ -142,6 +143,7 @@ const GooglePlacesInput = () => {
 - [x] Predefined places
 
 ### Changelog
+- 1.3.9 : Multiple bugfixes + fixed breaking change in React Native.
 - 1.3.6 : Fixed accuracy issue.
 - 1.3.5 : Fixed bug where input was being cleared.
 - 1.3.4 : Fixed bug where loading was breaking the component.

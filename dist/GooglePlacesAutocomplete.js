@@ -53,8 +53,6 @@ backgroundColor:'#FFFFFF'},
 
 powered:{},
 listView:{},
-
-
 row:{
 padding:13,
 height:44,
@@ -66,7 +64,6 @@ backgroundColor:'#c8c7cc'},
 
 description:{},
 loader:{
-
 flexDirection:'row',
 justifyContent:'flex-end',
 height:20},
@@ -117,6 +114,11 @@ isPredefinedPlace:true});});
 
 return[].concat(_toConsumableArray(res),_toConsumableArray(results));
 };_this.
+
+
+
+
+
 
 
 
@@ -272,7 +274,7 @@ console.warn(
 'google places autocomplete: request could not be completed or has been aborted');
 
 }else{
-_this.props.onFail();
+_this.props.onFail('request could not be completed or has been aborted');
 }
 }
 };
@@ -355,22 +357,22 @@ return _this.props.predefinedPlaces[i];
 return rowData;
 };_this.
 
-_filterResultsByTypes=function(responseJSON,types){
-if(types.length===0)return responseJSON.results;
+_filterResultsByTypes=function(unfilteredResults,types){
+if(types.length===0)return unfilteredResults;
 
 var results=[];
-for(var i=0;i<responseJSON.results.length;i++){
+for(var i=0;i<unfilteredResults.length;i++){
 var found=false;
 
 for(var j=0;j<types.length;j++){
-if(responseJSON.results[i].types.indexOf(types[j])!==-1){
+if(unfilteredResults[i].types.indexOf(types[j])!==-1){
 found=true;
 break;
 }
 }
 
 if(found===true){
-results.push(responseJSON.results[i]);
+results.push(unfilteredResults[i]);
 }
 }
 return results;
@@ -398,7 +400,7 @@ if(typeof responseJSON.results!=='undefined'){
 if(_this._isMounted===true){
 var results=[];
 if(_this.props.nearbyPlacesAPI==='GoogleReverseGeocoding'){
-results=_this._filterResultsByTypes(responseJSON,_this.props.filterReverseGeocodingByTypes);
+results=_this._filterResultsByTypes(responseJSON.results,_this.props.filterReverseGeocodingByTypes);
 }else{
 results=responseJSON.results;
 }
@@ -409,7 +411,11 @@ dataSource:_this.buildRowsFromResults(results)});
 }
 }
 if(typeof responseJSON.error_message!=='undefined'){
-console.warn('google places autocomplete: '+responseJSON.error_message);
+if(!_this.props.onFail)
+console.warn('google places autocomplete: '+responseJSON.error_message);else
+{
+_this.props.onFail(responseJSON.error_message);
+}
 }
 }else{
 
@@ -462,14 +468,22 @@ if(request.status===200){
 var responseJSON=JSON.parse(request.responseText);
 if(typeof responseJSON.predictions!=='undefined'){
 if(_this._isMounted===true){
-_this._results=responseJSON.predictions;
+var results=_this.props.nearbyPlacesAPI==='GoogleReverseGeocoding'?
+_this._filterResultsByTypes(responseJSON.predictions,_this.props.filterReverseGeocodingByTypes):
+responseJSON.predictions;
+
+_this._results=results;
 _this.setState({
-dataSource:_this.buildRowsFromResults(responseJSON.predictions)});
+dataSource:_this.buildRowsFromResults(results)});
 
 }
 }
 if(typeof responseJSON.error_message!=='undefined'){
-console.warn('google places autocomplete: '+responseJSON.error_message);
+if(!_this.props.onFail)
+console.warn('google places autocomplete: '+responseJSON.error_message);else
+{
+_this.props.onFail(responseJSON.error_message);
+}
 }
 }else{
 
@@ -494,7 +508,7 @@ _this._request(text);
 
 _this.setState({
 text:text,
-listViewDisplayed:true});
+listViewDisplayed:_this._isMounted||_this.props.autoFocus});
 
 };_this.
 
@@ -526,7 +540,7 @@ return _this.props.renderRow(rowData);
 
 return(
 _react2.default.createElement(_reactNative.Text,{style:[{flex:1},defaultStyles.description,_this.props.customStyles.description,rowData.isPredefinedPlace?_this.props.customStyles.predefinedPlacesDescription:{}],
-numberOfLines:1,__source:{fileName:_jsxFileName,lineNumber:528}},
+numberOfLines:1,__source:{fileName:_jsxFileName,lineNumber:542}},
 
 _this._renderDescription(rowData)));
 
@@ -544,7 +558,7 @@ return rowData.description||rowData.formatted_address||rowData.name;
 _renderLoader=function(rowData){
 if(rowData.isLoading===true){
 return(
-_react2.default.createElement(_reactNative.View,{style:[defaultStyles.loader,_this.props.customStyles.loader],__source:{fileName:_jsxFileName,lineNumber:547}},
+_react2.default.createElement(_reactNative.View,{style:[defaultStyles.loader,_this.props.customStyles.loader],__source:{fileName:_jsxFileName,lineNumber:561}},
 _this._getRowLoader()));
 
 
@@ -561,13 +575,13 @@ scrollEnabled:_this.props.isRowScrollable,
 keyboardShouldPersistTaps:_this.props.keyboardShouldPersistTaps,
 horizontal:true,
 showsHorizontalScrollIndicator:false,
-showsVerticalScrollIndicator:false,__source:{fileName:_jsxFileName,lineNumber:558}},
+showsVerticalScrollIndicator:false,__source:{fileName:_jsxFileName,lineNumber:572}},
 _react2.default.createElement(_reactNative.TouchableHighlight,{
 style:{width:WINDOW.width},
 onPress:function onPress(){return _this._onPress(rowData);},
-underlayColor:_this.props.listUnderlayColor||"#c8c7cc",__source:{fileName:_jsxFileName,lineNumber:565}},
+underlayColor:_this.props.listUnderlayColor||"#c8c7cc",__source:{fileName:_jsxFileName,lineNumber:579}},
 
-_react2.default.createElement(_reactNative.View,{style:[defaultStyles.row,_this.props.customStyles.row,rowData.isPredefinedPlace?_this.props.customStyles.specialItemRow:{}],__source:{fileName:_jsxFileName,lineNumber:570}},
+_react2.default.createElement(_reactNative.View,{style:[defaultStyles.row,_this.props.customStyles.row,rowData.isPredefinedPlace?_this.props.customStyles.specialItemRow:{}],__source:{fileName:_jsxFileName,lineNumber:584}},
 _this._renderRowData(rowData),
 _this._renderLoader(rowData)))));
 
@@ -584,7 +598,7 @@ return null;
 return(
 _react2.default.createElement(_reactNative.View,{
 key:sectionID+'-'+rowID,
-style:[defaultStyles.separator,_this.props.customStyles.separator],__source:{fileName:_jsxFileName,lineNumber:585}}));
+style:[defaultStyles.separator,_this.props.customStyles.separator],__source:{fileName:_jsxFileName,lineNumber:599}}));
 
 };_this.
 
@@ -605,12 +619,12 @@ return null;
 
 return(
 _react2.default.createElement(_reactNative.View,{
-style:[defaultStyles.row,defaultStyles.poweredContainer,_this.props.customStyles.poweredContainer],__source:{fileName:_jsxFileName,lineNumber:607}},
+style:[defaultStyles.row,defaultStyles.poweredContainer,_this.props.customStyles.poweredContainer],__source:{fileName:_jsxFileName,lineNumber:621}},
 
 _react2.default.createElement(_reactNative.Image,{
 style:[defaultStyles.powered,_this.props.customStyles.powered],
 resizeMode:_reactNative.Image.resizeMode.contain,
-source:require('../images/powered_by_google_on_white.png'),__source:{fileName:_jsxFileName,lineNumber:610}})));
+source:require('../images/powered_by_google_on_white.png'),__source:{fileName:_jsxFileName,lineNumber:624}})));
 
 
 
@@ -659,13 +673,13 @@ extraData:[_this.state.dataSource,_this.props],
 ItemSeparatorComponent:_this._renderSeparator,
 renderItem:function renderItem(_ref){var item=_ref.item;return _this._renderRow(item);},
 ListFooterComponent:_this._renderPoweredLogo},
-_this.props,{__source:{fileName:_jsxFileName,lineNumber:654}})));
+_this.props,{__source:{fileName:_jsxFileName,lineNumber:668}})));
 
 
 }
 
 return null;
-};_this.state=_this.getInitialState.call(_this);return _this;}_createClass(GooglePlacesAutocomplete,[{key:'componentWillMount',value:function componentWillMount(){this._request=this.props.debounce?(0,_lodash2.default)(this._request,this.props.debounce):this._request;}},{key:'componentDidMount',value:function componentDidMount(){this._isMounted=true;this._onChangeText(this.state.text);}},{key:'componentWillReceiveProps',value:function componentWillReceiveProps(nextProps){if(nextProps.listViewDisplayed!=='auto'){this.setState({listViewDisplayed:nextProps.listViewDisplayed});}if(typeof nextProps.text!=="undefined"&&this.state.text!==nextProps.text){this.setState({listViewDisplayed:true},this._handleChangeText(nextProps.text));}}},{key:'componentWillUnmount',value:function componentWillUnmount(){this._abortRequests();this._isMounted=false;}},{key:'_getRowLoader',value:function _getRowLoader(){return _react2.default.createElement(_reactNative.ActivityIndicator,{animating:true,size:'small',__source:{fileName:_jsxFileName,lineNumber:515}});}},{key:'render',value:function render()
+};_this.state=_this.getInitialState.call(_this);return _this;}_createClass(GooglePlacesAutocomplete,[{key:'componentWillMount',value:function componentWillMount(){this._request=this.props.debounce?(0,_lodash2.default)(this._request,this.props.debounce):this._request;}},{key:'componentDidMount',value:function componentDidMount(){this._handleChangeText(this.state.text);this._isMounted=true;}},{key:'componentWillReceiveProps',value:function componentWillReceiveProps(nextProps){var listViewDisplayed=true;if(nextProps.listViewDisplayed!=='auto'){listViewDisplayed=nextProps.listViewDisplayed;}if(typeof nextProps.text!=="undefined"&&this.state.text!==nextProps.text){this.setState({listViewDisplayed:listViewDisplayed},this._handleChangeText(nextProps.text));}else{this.setState({listViewDisplayed:listViewDisplayed});}}},{key:'componentWillUnmount',value:function componentWillUnmount(){this._abortRequests();this._isMounted=false;}},{key:'_getRowLoader',value:function _getRowLoader(){return _react2.default.createElement(_reactNative.ActivityIndicator,{animating:true,size:'small',__source:{fileName:_jsxFileName,lineNumber:529}});}},{key:'render',value:function render()
 {var _this2=this;var _props$textInputProps=
 
 
@@ -674,27 +688,28 @@ this.props.textInputProps,onFocus=_props$textInputProps.onFocus,userProps=_objec
 return(
 _react2.default.createElement(_reactNative.View,{
 style:[defaultStyles.container,this.props.customStyles.container],
-pointerEvents:'box-none',__source:{fileName:_jsxFileName,lineNumber:675}},
+pointerEvents:'box-none',__source:{fileName:_jsxFileName,lineNumber:689}},
 
 !this.props.textInputHide&&
 _react2.default.createElement(_reactNative.View,{
-style:[defaultStyles.textInputContainer,this.props.customStyles.textInputContainer],__source:{fileName:_jsxFileName,lineNumber:680}},
+style:[defaultStyles.textInputContainer,this.props.customStyles.textInputContainer],__source:{fileName:_jsxFileName,lineNumber:694}},
 
 this._renderLeftButton(),
 _react2.default.createElement(_reactNative.TextInput,_extends({
 ref:'textInput',
+editable:this.props.editable,
 returnKeyType:this.props.returnKeyType,
 autoFocus:this.props.autoFocus,
 style:[defaultStyles.textInput,this.props.customStyles.textInput],
 value:this.state.text,
 placeholder:this.props.placeholder,
-
+onSubmitEditing:this.props.onSubmitEditing,
 placeholderTextColor:this.props.placeholderTextColor,
 onFocus:onFocus?function(){_this2._onFocus();onFocus();}:this._onFocus,
 clearButtonMode:'while-editing',
 underlineColorAndroid:this.props.underlineColorAndroid},
 userProps,{
-onChangeText:this._handleChangeText,__source:{fileName:_jsxFileName,lineNumber:684}})),
+onChangeText:this._handleChangeText,__source:{fileName:_jsxFileName,lineNumber:698}})),
 
 this._renderRightButton()),
 
@@ -743,7 +758,11 @@ listUnderlayColor:_propTypes2.default.string,
 debounce:_propTypes2.default.number,
 isRowScrollable:_propTypes2.default.bool,
 text:_propTypes2.default.string,
-textInputHide:_propTypes2.default.bool};
+textInputHide:_propTypes2.default.bool,
+suppressDefaultStyles:_propTypes2.default.bool,
+numberOfLines:_propTypes2.default.number,
+onSubmitEditing:_propTypes2.default.func,
+editable:_propTypes2.default.bool};
 
 GooglePlacesAutocomplete.defaultProps={
 placeholder:'Search',
@@ -785,7 +804,11 @@ predefinedPlacesAlwaysVisible:false,
 enableEmptySections:true,
 listViewDisplayed:'auto',
 debounce:0,
-textInputHide:false};
+textInputHide:false,
+suppressDefaultStyles:false,
+numberOfLines:1,
+onSubmitEditing:function onSubmitEditing(){},
+editable:true};
 
 
 
@@ -795,7 +818,7 @@ render:function render(){
 return(
 _react2.default.createElement(GooglePlacesAutocomplete,_extends({
 ref:'GooglePlacesAutocomplete'},
-options,{__source:{fileName:_jsxFileName,lineNumber:796}})));
+options,{__source:{fileName:_jsxFileName,lineNumber:819}})));
 
 
 }});
