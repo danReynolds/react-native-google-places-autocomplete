@@ -623,7 +623,7 @@ export default class GooglePlacesAutocomplete extends Component {
       >
         <Image
           style={[defaultStyles.powered, this.props.customStyles.powered]}
-          resizeMode={Image.resizeMode.contain}
+          resizeMode="contain"
           source={require('../images/powered_by_google_on_white.png')}
         />
       </View>

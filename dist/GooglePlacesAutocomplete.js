@@ -623,7 +623,7 @@ style:[defaultStyles.row,defaultStyles.poweredContainer,_this.props.customStyles
 
 _react2.default.createElement(_reactNative.Image,{
 style:[defaultStyles.powered,_this.props.customStyles.powered],
-resizeMode:_reactNative.Image.resizeMode.contain,
+resizeMode:'contain',
 source:require('../images/powered_by_google_on_white.png'),__source:{fileName:_jsxFileName,lineNumber:624}})));
 
 
